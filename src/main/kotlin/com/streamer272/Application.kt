@@ -9,5 +9,6 @@ fun main() {
         configureDatabase()
         configureRouting()
         configureMonitoring()
+        configureSerialization()
     }.start(wait = true)
 }

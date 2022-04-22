@@ -6,8 +6,6 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 object UserTable : IntIdTable() {
     val username: Column<String> = varchar("username", 32).uniqueIndex()
@@ -19,8 +17,11 @@ class User(id: EntityID<Int>) : IntEntity(id) {
     var username by UserTable.username
     var password by UserTable.password
 
-    override fun toString(): String {
-        return Json.encodeToString(UserDTO(id.value, username))
+    fun toDTO(): UserDTO {
+        return UserDTO(
+            id.value,
+            username,
+        )
     }
 }
 
@@ -28,4 +29,10 @@ class User(id: EntityID<Int>) : IntEntity(id) {
 data class UserDTO (
     val id: Int,
     val username: String,
+)
+
+@Serializable
+data class UserRegisterDTO (
+    val username: String,
+    val password: String
 )
