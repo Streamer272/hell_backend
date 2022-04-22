@@ -1,6 +1,6 @@
 package com.streamer272.plugins
 
-import com.streamer272.module.UserTable
+import com.streamer272.entities.UserTable
 import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils

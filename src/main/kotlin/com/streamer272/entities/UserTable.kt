@@ -1,5 +1,6 @@
-package com.streamer272.module
+package com.streamer272.entities
 
+import com.streamer272.dtos.UserDTO
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -25,14 +26,3 @@ class User(id: EntityID<Int>) : IntEntity(id) {
     }
 }
 
-@Serializable
-data class UserDTO (
-    val id: Int,
-    val username: String,
-)
-
-@Serializable
-data class UserRegisterDTO (
-    val username: String,
-    val password: String
-)
