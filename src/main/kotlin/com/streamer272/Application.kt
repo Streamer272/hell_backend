@@ -6,8 +6,8 @@ import com.streamer272.plugins.*
 
 fun main() {
     embeddedServer(Netty, port = 8000, host = "0.0.0.0") {
+        configureDatabase()
         configureRouting()
-        configureSerialization()
         configureMonitoring()
     }.start(wait = true)
 }
