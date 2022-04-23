@@ -1,47 +1,31 @@
 package com.streamer272.plugins
 
-import com.streamer272.entities.*
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
+import com.streamer272.dtos.*
+import com.streamer272.entities.User
+import com.streamer272.entities.UserTable
 import io.ktor.http.*
-import io.ktor.server.routing.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.security.MessageDigest
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import com.streamer272.dtos.Token
-import com.streamer272.dtos.UserDTO
-import com.streamer272.dtos.UserLoginDTO
-import com.streamer272.dtos.UserRegisterDTO
 
 fun Application.configureRouting() {
     routing {
-        get("/") {
-            val users: MutableList<UserDTO> = mutableListOf()
-            transaction {
-                User.all().forEach {
-                    users.add(it.toDTO())
-                }
-            }
-
-            call.respond(HttpStatusCode.OK, Json.encodeToString(users))
-        }
-
         post("/login") {
             val login = call.receive<UserLoginDTO>()
 
             val user = transaction {
                 User.find { UserTable.username eq login.username and (UserTable.password eq hash(login.password)) }.firstOrNull()
-            }
-            if (user == null) {
-                call.respond(HttpStatusCode.Unauthorized, "Invalid username or password")
-            }
+            } ?: return@post call.respond(HttpStatusCode.Unauthorized, ErrorDTO("Invalid username or password"))
 
-            val token = Token(generateToken(user!!))
+            val token = TokenDTO(generateToken(user))
             call.respond(HttpStatusCode.OK, Json.encodeToString(token))
         }
 
@@ -56,9 +40,9 @@ fun Application.configureRouting() {
                     }
                 }
 
-                call.respond(HttpStatusCode.OK, Json.encodeToString(newUser.toDTO()))
+                call.respond(HttpStatusCode.OK, newUser.toDTO())
             } catch (e: Exception) {
-                return@post call.respond(HttpStatusCode.BadRequest, "Failed to create user")
+                return@post call.respond(HttpStatusCode.BadRequest, ErrorDTO("Failed to create user", e.message))
             }
         }
     }
