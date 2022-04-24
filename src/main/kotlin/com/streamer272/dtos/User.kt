@@ -9,13 +9,7 @@ data class UserDTO (
 )
 
 @Serializable
-data class UserLoginDTO (
+data class UserAuthDTO (
     val username: String,
     val password: String,
-)
-
-@Serializable
-data class UserRegisterDTO (
-    val username: String,
-    val password: String
 )

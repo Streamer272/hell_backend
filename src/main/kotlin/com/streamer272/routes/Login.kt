@@ -2,8 +2,7 @@ package com.streamer272.routes
 
 import com.streamer272.dtos.ErrorDTO
 import com.streamer272.dtos.TokenDTO
-import com.streamer272.dtos.UserLoginDTO
-import com.streamer272.dtos.UserRegisterDTO
+import com.streamer272.dtos.UserAuthDTO
 import com.streamer272.entities.User
 import com.streamer272.entities.UserTable
 import com.streamer272.plugins.generateToken
@@ -21,18 +20,18 @@ import org.jetbrains.exposed.sql.transactions.transaction
 fun Application.setupAuth() {
     routing {
         post("/auth/login") {
-            val login = call.receive<UserLoginDTO>()
+            val login = call.receive<UserAuthDTO>()
 
             val user = transaction {
                 User.find { UserTable.username eq login.username and (UserTable.password eq hash(login.password)) }.firstOrNull()
             } ?: return@post call.respond(HttpStatusCode.Unauthorized, ErrorDTO("Invalid username or password"))
 
             val token = TokenDTO(generateToken(user))
-            call.respond(HttpStatusCode.OK, Json.encodeToString(token))
+            call.respond(HttpStatusCode.OK, token)
         }
 
         post("/auth/register") {
-            val user = call.receive<UserRegisterDTO>()
+            val user = call.receive<UserAuthDTO>()
 
             try {
                 val newUser = transaction {
@@ -42,7 +41,8 @@ fun Application.setupAuth() {
                     }
                 }
 
-                call.respond(HttpStatusCode.OK, newUser.toDTO())
+                val token = TokenDTO(generateToken(newUser))
+                call.respond(HttpStatusCode.OK, token)
             } catch (e: Exception) {
                 return@post call.respond(HttpStatusCode.BadRequest, ErrorDTO("Failed to create user", e.message))
             }
